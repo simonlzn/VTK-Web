@@ -70,19 +70,9 @@ launcher_config = {
     ## ===============================
 
     "apps" : {
-        "cone" : {
+        "new" : {
             "cmd" : [
-                "${vtkpython}", "${vtk_python_path}/vtk_web_cone.py", "--port", "$port" ],
-            "ready_line" : "Starting factory"
-        },
-        "graph" : {
-            "cmd" : [
-                "${vtkpython}", "/home/zshen/src/vtkweb/vtk_web_demo4.py", "--port", "$port", "--content", "/home/zshen/src/vtkweb/www/"],
-            "ready_line" : "Starting factory"
-        },
-        "abc" : {
-            "cmd" : [
-                "${vtkpython}", "/home/zshen/src/vtkweb/vtk_web_demo5.py", "--port", "$port", "--content", "/home/zshen/src/vtkweb/www/"],
+                "${vtkpython}", "/home/zshen/src/vtkweb/render_volume.py", "--port", "$port", "--content", "/home/zshen/src/vtkweb/www/", "--filename", "$filename"],
             "ready_line" : "Starting factory"
         }
     }
@@ -485,7 +475,7 @@ class LauncherResource(resource.Resource, object):
 
     def render_POST(self, request):
         print request.content.getvalue()
-        payload = {'sessionManagerURL':request.args['sessionManagerURL'][0],  'application':request.args['application'][0]}
+        payload = {'sessionManagerURL':request.args['sessionManagerURL'][0],  'application':request.args['application'][0], 'filename':request.args['filename'][0]}
         # payload = json.loads(request.content.getvalue())
         # payload =  {'sessionManagerURL':'localhost:8080/paraview/',  'application':"graph"}
         # Make sure the request has all the expected keys

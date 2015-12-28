@@ -1,37 +1,3 @@
-
-r"""
-    This module is a VTK Web server application.
-    The following command line illustrate how to use it::
-
-        $ vtkpython .../vtk_web_cone.py
-
-    Any VTK Web executable script come with a set of standard arguments that
-    can be overriden if need be::
-        --host localhost
-             Interface on which the HTTP server will listen on.
-
-        --port 8080
-             Port number on which the HTTP server will listen to.
-
-        --content /path-to-web-content/
-             Directory that you want to server as static web content.
-             By default, this variable is empty which mean that we rely on another server
-             to deliver the static content and the current process only focus on the
-             WebSocket connectivity of clients.
-
-        --authKey vtk-secret
-             Secret key that should be provided by the client to allow it to make any
-             WebSocket communication. The client will assume if none is given that the
-             server expect "vtk-secret" as secret key.
-"""
-
-# import to process args
-import sys
-import os
-
-# import vtk modules.
-from autobahn.wamp              import types
-
 import vtk
 from vtk.web import protocols, server
 from vtk.web import wamp as vtk_wamp
@@ -66,7 +32,7 @@ class _WebCone(vtk_wamp.ServerProtocol):
         renderWindowInteractor.GetInteractorStyle().SetCurrentStyleToTrackballCamera()
 	
     	reader = vtk.vtkNrrdReader()
-        reader.SetFileName("../volume1.nrrd")
+        reader.SetFileName('../volume/' + filename)
         reader.Update()
             
         surface_extractor = vtk.vtkMarchingCubes()
@@ -76,8 +42,6 @@ class _WebCone(vtk_wamp.ServerProtocol):
         surface_extractor.ComputeScalarsOn()
         surface_extractor.Update()
             
-       
-        #cone = vtk.vtkConeSource()
         mapper = vtk.vtkPolyDataMapper()
         actor = vtk.vtkActor()
 
@@ -103,12 +67,10 @@ class _WebCone(vtk_wamp.ServerProtocol):
         # Create default pipeline (Only once for all the session)
         if not _WebCone.view:
             # VTK Web application specific
-            renderWindow1 = self.do_VTK()
-            # renderWindow2 = self.do_VTK()
-            _WebCone.view = renderWindow1
-            
-            #_WebCone.view = renderWindow
-            self.Application.GetObjectIdMap().SetActiveObject("VIEW", renderWindow1)
+            renderWindow = self.do_VTK()
+            _WebCone.view = renderWindow
+
+            self.Application.GetObjectIdMap().SetActiveObject("VIEW", renderWindow)
             # self.Application.GetObjectIdMap().SetActiveObject("VIEW", renderWindow)
 
 # =============================================================================
@@ -117,14 +79,19 @@ class _WebCone(vtk_wamp.ServerProtocol):
 
 if __name__ == "__main__":
     # Create argument parser
-    parser = argparse.ArgumentParser(description="VTK/Web Cone web-application")
+    parser = argparse.ArgumentParser(description="VTK/Web web-application")
 
+    parser.add_argument("--filename",
+                        help="read filename from other request",
+                        type=str, default='volume2.nrrd')
     # Add default arguments
     server.add_arguments(parser)
 
+    global filename
     # Exctract arguments
     args = parser.parse_args()
 
+    filename = args.filename
     # Configure our current application
     _WebCone.authKey = args.authKey
 
